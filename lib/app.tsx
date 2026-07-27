@@ -91,6 +91,7 @@ export function AppProvider({ children }: { children: ReactNode }): ReactNode {
       .select("*")
       .eq("id", userId)
       .maybeSingle();
+
     if (data) {
       setAccount({
         userId,
@@ -98,6 +99,26 @@ export function AppProvider({ children }: { children: ReactNode }): ReactNode {
         handle: data.handle,
         avatarColor: data.avatar_color,
       });
+      return;
+    }
+
+    // Profile missing — create from user metadata (set during signup)
+    const { data: { user } } = await supabase.auth.getUser();
+    const meta = user?.user_metadata ?? {};
+    const displayName: string = meta.display_name ?? "Anon";
+    const avatarColor: string = meta.avatar_color ?? "#ea580c";
+    const baseHandle: string = meta.base_handle ?? handleFromName(displayName);
+    const handle = await ensureUniqueHandle(baseHandle);
+
+    const { error } = await supabase.from("profiles").insert({
+      id: userId,
+      display_name: displayName,
+      handle,
+      avatar_color: avatarColor,
+    });
+
+    if (!error) {
+      setAccount({ userId, displayName, handle, avatarColor });
     }
   }, []);
 
@@ -141,21 +162,32 @@ export function AppProvider({ children }: { children: ReactNode }): ReactNode {
       if (input.password.length < 6)
         return { ok: false, error: "Password needs at least 6 characters." };
 
+      const baseHandle = handleFromName(displayName);
+
       const { data, error } = await supabase.auth.signUp({
         email: input.email.trim(),
         password: input.password,
+        options: {
+          data: {
+            display_name: displayName,
+            base_handle: baseHandle,
+            avatar_color: input.avatarColor,
+          },
+        },
       });
       if (error) return { ok: false, error: error.message };
       if (!data.user) return { ok: false, error: "Signup failed. Try again." };
 
-      // Email confirmation required — session is null until confirmed
       if (!data.session) {
-        return { ok: false, error: "Check your email to confirm your account, then sign in." };
+        // Email confirmation required — profile will be created on first sign-in
+        return {
+          ok: false,
+          error: "✉️ Check your email and click the confirmation link, then sign in here.",
+        };
       }
 
-      const baseHandle = handleFromName(displayName);
+      // No confirmation required — create profile immediately
       const handle = await ensureUniqueHandle(baseHandle);
-
       const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
         display_name: displayName,
