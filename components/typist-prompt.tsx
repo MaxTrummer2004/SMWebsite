@@ -35,8 +35,8 @@ export function TypistPrompt({ scale = 9 }: { scale?: number }): ReactNode {
     <button
       type="button"
       onClick={poke}
-      disabled={loading}
-      className="cursor-pointer transition-opacity hover:opacity-70 disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+
+      className="cursor-pointer transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       aria-label="Poke Brixel"
       title="poke Brixel"
     >
