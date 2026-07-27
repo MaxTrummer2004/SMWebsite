@@ -18,7 +18,7 @@ export function Footer(): ReactNode {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs font-mono text-sm text-panel-foreground/60">
-              The tiny 8-bit social club for friends. Local-first. Yours.
+              The tiny 8-bit social club for friends. Real-time. Shared.
             </p>
           </div>
 
@@ -36,7 +36,7 @@ export function Footer(): ReactNode {
 
         <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 font-mono text-xs text-panel-foreground/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} SMKnowers · made with pixels</p>
-          <p>Posts live in your browser · powered by Giphy</p>
+          <p>Posts shared live with everyone · powered by Giphy</p>
         </div>
       </div>
     </footer>
