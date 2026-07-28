@@ -20,6 +20,7 @@ export function NotificationSettings(): ReactNode {
   const [subscribed, setSubscribed] = useState(false);
   const [followed, setFollowed] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const subRef = useRef<PushSubscription | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +71,9 @@ export function NotificationSettings(): ReactNode {
 
   const subscribe = async (handles: string[]) => {
     setSaving(true);
+    setError(null);
     try {
+      if (!VAPID_PUBLIC_KEY) throw new Error("VAPID key missing – check Vercel env vars");
       const reg = await navigator.serviceWorker.ready;
       let sub = subRef.current;
       if (!sub) {
@@ -83,14 +86,20 @@ export function NotificationSettings(): ReactNode {
         });
         subRef.current = sub;
       }
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subscription: sub.toJSON(), followedHandles: handles }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Server error ${res.status}`);
+      }
       localStorage.setItem("smknowers.notif.followed", JSON.stringify(handles));
       setFollowed(handles);
       setSubscribed(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setSaving(false);
     }
@@ -173,6 +182,9 @@ export function NotificationSettings(): ReactNode {
 
           {followed.length === 0 && (
             <p className="mt-2 font-mono text-[10px] text-muted-foreground">Select at least one.</p>
+          )}
+          {error && (
+            <p className="mt-2 font-mono text-[10px] text-red-500 break-words">{error}</p>
           )}
 
           <div className="mt-4 flex gap-2">
