@@ -138,7 +138,7 @@ export async function POST(req: Request) {
       });
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
       if (text) {
-        await adminSupabase.from("comments").insert({
+        const { error } = await adminSupabase.from("comments").insert({
           post_id: body.postId,
           user_id: null,
           author: "Brixel",
@@ -146,6 +146,8 @@ export async function POST(req: Request) {
           avatar_color: "#ea580c",
           text,
         });
+        // unique constraint violation = already replied, treat as success
+        if (error && !error.code?.startsWith("23")) throw error;
       }
       return NextResponse.json({ ok: true });
     }
