@@ -86,7 +86,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
               ? { duration: 0.4 }
               : { duration: 1, ease: EASE, delay: 0.35 }
           }
-          className="pointer-events-none absolute top-0 right-0 h-2/3 w-2/3 sm:inset-y-0 sm:h-auto sm:w-3/4 lg:w-1/2"
+          className="pointer-events-none absolute top-0 right-0 h-2/3 w-2/3 hidden sm:block sm:inset-y-0 sm:h-auto sm:w-3/4 lg:w-1/2"
           style={{
             maskImage: FIELD_MASK,
             WebkitMaskImage: FIELD_MASK,
@@ -101,7 +101,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
           variants={content}
           initial="hidden"
           animate="visible"
-          className="relative z-10 flex w-fit flex-col justify-center px-6 pt-12 pb-60 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
+          className="relative z-10 flex w-fit flex-col justify-center px-6 pt-12 pb-72 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
         >
           {/* Opaque backdrop only behind text+buttons — cursor grid shows through empty card area */}
           <div className="relative z-20 w-fit bg-background/85 backdrop-blur-sm px-6 py-8 -mx-6 sm:-mx-10 lg:-mx-16 sm:px-10 lg:px-16">
