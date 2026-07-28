@@ -76,7 +76,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
         }
         className="relative flex flex-1 overflow-hidden border border-border bg-transparent"
       >
-        {/* PixelField — top-right, masked */}
+        {/* PixelField — mobile: full-width top strip; desktop: top-right corner */}
         <motion.div
           aria-hidden="true"
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
@@ -86,7 +86,27 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
               ? { duration: 0.4 }
               : { duration: 1, ease: EASE, delay: 0.35 }
           }
-          className="pointer-events-none absolute top-0 right-0 h-2/3 w-2/3 hidden sm:block sm:inset-y-0 sm:h-auto sm:w-3/4 lg:w-1/2"
+          className="pointer-events-none absolute top-0 inset-x-0 h-48 sm:inset-x-auto sm:right-0 sm:inset-y-0 sm:h-auto sm:w-3/4 lg:w-1/2"
+          style={{
+            maskImage: "linear-gradient(to bottom, #000 30%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, #000 30%, transparent 100%)",
+            transformOrigin: "top right",
+          }}
+          // Desktop overrides mask to original radial gradient
+        >
+          <PixelField className="h-full w-full" />
+        </motion.div>
+        {/* Desktop-only mask override */}
+        <motion.div
+          aria-hidden="true"
+          initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={
+            reduced
+              ? { duration: 0.4 }
+              : { duration: 1, ease: EASE, delay: 0.35 }
+          }
+          className="pointer-events-none absolute top-0 right-0 inset-y-0 w-3/4 lg:w-1/2 hidden sm:block"
           style={{
             maskImage: FIELD_MASK,
             WebkitMaskImage: FIELD_MASK,

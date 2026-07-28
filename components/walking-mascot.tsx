@@ -103,7 +103,7 @@ export function WalkingMascot(): ReactNode {
         let targetX = 160; // fallback
         if (btn) {
           const btnRect = btn.getBoundingClientRect();
-          targetX = Math.max(8, btnRect.right - containerRect.left + 80);
+          targetX = Math.max(8, Math.min(btnRect.right - containerRect.left + 80, maxX - 8));
         }
 
         // Pause + bubble before heading left
