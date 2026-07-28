@@ -25,11 +25,9 @@ export function Feed(): ReactNode {
   const commentingRef = useRef<Set<string>>(new Set());
   const brixelReplyRef = useRef<Set<string>>(new Set());
 
-  // Load persisted IDs on mount
+  // Load persisted commented IDs on mount
   useEffect(() => {
     try {
-      const replied = localStorage.getItem("smknowers.brixel.replied");
-      if (replied) brixelReplyRef.current = new Set(JSON.parse(replied));
       const commented = localStorage.getItem("smknowers.brixel.commented");
       if (commented) commentingRef.current = new Set(JSON.parse(commented));
     } catch {}
@@ -59,24 +57,20 @@ export function Feed(): ReactNode {
     }
   }, [hydrated, posts]);
 
-  const markBrixelReplied = (key: string) => {
-    brixelReplyRef.current.add(key);
-    try {
-      localStorage.setItem("smknowers.brixel.replied", JSON.stringify([...brixelReplyRef.current]));
-    } catch {}
-  };
-
   // Reply when @brixel is mentioned in post text or comments
   useEffect(() => {
     if (!hydrated) return;
     for (const post of posts) {
-      // @brixel in post text → reply as comment (skip mascot's own posts)
+      const brixelComments = post.comments?.filter((c) => c.handle === "@brixel") ?? [];
+
+      // @brixel in post text → reply once (skip if brixel already commented)
       if (
         !post.isMascot &&
         post.text?.toLowerCase().includes("@brixel") &&
+        brixelComments.length === 0 &&
         !brixelReplyRef.current.has(`post:${post.id}`)
       ) {
-        markBrixelReplied(`post:${post.id}`);
+        brixelReplyRef.current.add(`post:${post.id}`);
         fetch("/api/mascot", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -84,14 +78,19 @@ export function Feed(): ReactNode {
         }).catch(() => brixelReplyRef.current.delete(`post:${post.id}`));
       }
 
-      // @brixel in a comment → reply as another comment
+      // @brixel in a comment → reply if no brixel comment exists AFTER this mention
       for (const comment of post.comments ?? []) {
         if (
           comment.handle !== "@brixel" &&
           comment.text?.toLowerCase().includes("@brixel") &&
           !brixelReplyRef.current.has(`comment:${comment.id}`)
         ) {
-          markBrixelReplied(`comment:${comment.id}`);
+          const alreadyReplied = brixelComments.some((c) => c.createdAt > comment.createdAt);
+          if (alreadyReplied) {
+            brixelReplyRef.current.add(`comment:${comment.id}`);
+            continue;
+          }
+          brixelReplyRef.current.add(`comment:${comment.id}`);
           fetch("/api/mascot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
