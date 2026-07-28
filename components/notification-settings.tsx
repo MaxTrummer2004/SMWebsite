@@ -74,17 +74,12 @@ export function NotificationSettings(): ReactNode {
     setError(null);
     try {
       if (!VAPID_PUBLIC_KEY) throw new Error("VAPID key missing – check Vercel env vars");
-      // Unregister stale SW + push subscriptions
-      const regs = await navigator.serviceWorker.getRegistrations();
-      for (const r of regs) {
-        const s = await r.pushManager.getSubscription();
-        if (s) await s.unsubscribe();
-        await r.unregister();
-      }
-      subRef.current = null;
-
-      await navigator.serviceWorker.register("/sw.js");
       const readyReg = await navigator.serviceWorker.ready;
+
+      // Unsubscribe any stale push subscription (old VAPID key)
+      const existing = await readyReg.pushManager.getSubscription();
+      if (existing) await existing.unsubscribe();
+      subRef.current = null;
 
       const perm = await Notification.requestPermission();
       setPermission(perm);
