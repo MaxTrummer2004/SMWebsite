@@ -70,6 +70,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* Notched 8-bit corner clip shared by cards, panels, buttons */
