@@ -187,14 +187,16 @@ export async function POST(req: Request) {
       });
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
       if (text) {
-        await adminSupabase.from("comments").insert({
+        const { error } = await adminSupabase.from("comments").insert({
           post_id: body.postId,
           user_id: null,
           author: "Brixel",
           handle: "@brixel",
           avatar_color: "#ea580c",
           text,
+          triggered_by_comment_id: commentId ?? null,
         });
+        if (error && !error.code?.startsWith("23")) throw error;
       }
       return NextResponse.json({ ok: true });
     }
