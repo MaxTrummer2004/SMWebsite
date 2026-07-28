@@ -122,10 +122,10 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
           variants={content}
           initial="hidden"
           animate="visible"
-          className="relative z-10 flex w-fit flex-col justify-center px-6 pt-12 pb-72 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
+          className="relative z-10 flex w-fit flex-col justify-center px-6 pt-8 pb-52 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
         >
           {/* Opaque backdrop only behind text+buttons — cursor grid shows through empty card area */}
-          <div className="relative z-20 w-fit bg-background/85 backdrop-blur-sm px-6 py-8 -mx-6 sm:-mx-10 lg:-mx-16 sm:px-10 lg:px-16">
+          <div className="relative z-20 w-fit bg-background/85 backdrop-blur-sm px-6 py-5 sm:py-8 -mx-6 sm:-mx-10 lg:-mx-16 sm:px-10 lg:px-16">
             <motion.span
               variants={item}
               className="inline-flex w-fit items-center gap-2 border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs uppercase tracking-widest text-accent"
@@ -137,7 +137,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
             <motion.h1
               id="hero-title"
               variants={headline}
-              className="mt-6 text-6xl leading-[1.05] font-semibold tracking-tight text-balance text-foreground sm:text-7xl lg:text-8xl"
+              className="mt-4 text-4xl leading-[1.05] font-semibold tracking-tight text-balance text-foreground sm:mt-6 sm:text-7xl lg:text-8xl"
             >
               {words.map((w, i) => (
                 <Fragment key={`${w}-${i}`}>
@@ -153,7 +153,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
 
             <motion.p
               variants={item}
-              className="mt-6 max-w-2xl font-mono text-base leading-relaxed text-muted-foreground"
+              className="mt-4 max-w-2xl font-mono text-base leading-relaxed text-muted-foreground hidden sm:block"
             >
               SMKnowers is the tiny 8-bit hangout for you and your friends. Write
               a thought, drop the perfect GIF, react, repeat. Your feed lives in

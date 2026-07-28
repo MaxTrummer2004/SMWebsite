@@ -35,7 +35,7 @@ export function ThemeSwitch(): ReactNode {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed top-4 right-4 sm:bottom-6 sm:right-6 sm:top-auto z-50">
       <button
         onClick={toggleTheme}
         className="focus-ring flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-border bg-background text-foreground shadow-lg transition-colors hover:bg-muted"
