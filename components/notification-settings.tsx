@@ -75,17 +75,19 @@ export function NotificationSettings(): ReactNode {
     try {
       if (!VAPID_PUBLIC_KEY) throw new Error("VAPID key missing – check Vercel env vars");
       const reg = await navigator.serviceWorker.ready;
-      let sub = subRef.current;
-      if (!sub) {
-        const perm = await Notification.requestPermission();
-        setPermission(perm);
-        if (perm !== "granted") { setSaving(false); return; }
-        sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
-        subRef.current = sub;
-      }
+      // Always unsubscribe old subscription first (clears stale VAPID key)
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) await existing.unsubscribe();
+      subRef.current = null;
+
+      const perm = await Notification.requestPermission();
+      setPermission(perm);
+      if (perm !== "granted") { setSaving(false); return; }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+      subRef.current = sub;
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
