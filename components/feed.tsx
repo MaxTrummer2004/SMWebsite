@@ -25,11 +25,13 @@ export function Feed(): ReactNode {
   const commentingRef = useRef<Set<string>>(new Set());
   const brixelReplyRef = useRef<Set<string>>(new Set());
 
-  // Load persisted brixel reply IDs on mount
+  // Load persisted IDs on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("smknowers.brixel.replied");
-      if (saved) brixelReplyRef.current = new Set(JSON.parse(saved));
+      const replied = localStorage.getItem("smknowers.brixel.replied");
+      if (replied) brixelReplyRef.current = new Set(JSON.parse(replied));
+      const commented = localStorage.getItem("smknowers.brixel.commented");
+      if (commented) commentingRef.current = new Set(JSON.parse(commented));
     } catch {}
   }, []);
   const dailyTriggered = useRef(false);
@@ -47,12 +49,13 @@ export function Feed(): ReactNode {
     );
     for (const post of uncommented) {
       commentingRef.current.add(post.id);
+      try { localStorage.setItem("smknowers.brixel.commented", JSON.stringify([...commentingRef.current])); } catch {}
       const postText = post.text || (post.gif ? `[posted a gif: "${post.gif.title}"]` : "");
       fetch("/api/mascot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "comment", postText, postId: post.id }),
-      }).catch(() => commentingRef.current.delete(post.id));
+      }).catch(() => { commentingRef.current.delete(post.id); try { localStorage.setItem("smknowers.brixel.commented", JSON.stringify([...commentingRef.current])); } catch {} });
     }
   }, [hydrated, posts]);
 
