@@ -1,12 +1,14 @@
 "use client";
 
+import { MentionDropdown } from "@/components/mention-dropdown";
 import { PixelCharacter } from "@/components/pixel-character";
 import { PixelIcon } from "@/components/pixel-icon";
 import { useApp } from "@/lib/app";
 import { useReducedMotion } from "@/lib/motion";
+import { useMentionAutocomplete } from "@/lib/use-mention-autocomplete";
 import type { Post } from "@/lib/types";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { Fragment, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { Fragment, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 
 function renderPostText(text: string): ReactNode {
   const parts = text.split(/([@#][\p{L}\d_]+)/gu);
@@ -48,8 +50,16 @@ export function PostCard({
 }): ReactNode {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
-  const { addComment, account, signedIn } = useApp();
+  const { addComment, account, signedIn, posts } = useApp();
   const [commentText, setCommentText] = useState("");
+
+  const knownHandles = useMemo(() => {
+    const set = new Set<string>(["@brixel"]);
+    for (const p of posts) if (p.handle && p.handle !== account?.handle) set.add(p.handle);
+    return Array.from(set).sort();
+  }, [posts, account?.handle]);
+
+  const mention = useMentionAutocomplete(knownHandles);
 
   const rx = useMotionValue(0);
   const ry = useMotionValue(0);
@@ -87,7 +97,8 @@ export function PostCard({
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === "Enter") submitComment();
+    const handled = mention.onKeyDown(e, commentText, setCommentText);
+    if (!handled && e.key === "Enter") submitComment();
   };
 
   const tags = hashtags(post.text);
@@ -204,14 +215,18 @@ export function PostCard({
 
         {signedIn ? (
           <div className="flex flex-1 gap-2">
-            <input
-              type="text"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={onKey}
-              placeholder="comment…"
-              className="flex-1 border border-border bg-muted px-3 py-1.5 font-mono text-xs outline-none focus:border-accent"
-            />
+            <div className="relative flex-1">
+              <input
+                ref={mention.inputRef as React.RefObject<HTMLInputElement>}
+                type="text"
+                value={commentText}
+                onChange={(e) => mention.onInputChange(e, setCommentText)}
+                onKeyDown={onKey}
+                placeholder="comment…"
+                className="w-full border border-border bg-muted px-3 py-1.5 font-mono text-xs outline-none focus:border-accent"
+              />
+              <MentionDropdown suggestions={mention.suggestions} onSelect={(h) => mention.insertMention(h, commentText, setCommentText)} />
+            </div>
             <button
               type="button"
               onClick={submitComment}
