@@ -22,40 +22,9 @@ export function Feed(): ReactNode {
   const { posts, hydrated, toggleLike, removePost, openComposer, signedIn, account } = useApp();
   const [tab, setTab] = useState<"feed" | "archive">("feed");
 
-  const commentingRef = useRef<Set<string>>(new Set());
+  // In-memory only — no localStorage. DB state is the source of truth across devices.
   const brixelReplyRef = useRef<Set<string>>(new Set());
-
-  // Load persisted commented IDs on mount
-  useEffect(() => {
-    try {
-      const commented = localStorage.getItem("smknowers.brixel.commented");
-      if (commented) commentingRef.current = new Set(JSON.parse(commented));
-    } catch {}
-  }, []);
   const dailyTriggered = useRef(false);
-
-  // Ask mascot to comment on each new post (server writes comment directly to DB)
-  useEffect(() => {
-    if (!hydrated) return;
-    const uncommented = posts.filter(
-      (p) =>
-        !p.mascotComment &&
-        !p.isMascot &&
-        (p.text || p.gif) &&
-        !p.comments?.some((c) => c.handle === "@brixel") &&
-        !commentingRef.current.has(p.id),
-    );
-    for (const post of uncommented) {
-      commentingRef.current.add(post.id);
-      try { localStorage.setItem("smknowers.brixel.commented", JSON.stringify([...commentingRef.current])); } catch {}
-      const postText = post.text || (post.gif ? `[posted a gif: "${post.gif.title}"]` : "");
-      fetch("/api/mascot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "comment", postText, postId: post.id }),
-      }).catch(() => { commentingRef.current.delete(post.id); try { localStorage.setItem("smknowers.brixel.commented", JSON.stringify([...commentingRef.current])); } catch {} });
-    }
-  }, [hydrated, posts]);
 
   // Reply when @brixel is mentioned in post text or comments
   useEffect(() => {
@@ -63,10 +32,11 @@ export function Feed(): ReactNode {
     for (const post of posts) {
       const brixelComments = post.comments?.filter((c) => c.handle === "@brixel") ?? [];
 
-      // @brixel in post text → reply once (skip if brixel already commented)
+      // @brixel in post text → skip if brixel already replied (DB check, cross-device safe)
       if (
         !post.isMascot &&
         post.text?.toLowerCase().includes("@brixel") &&
+        !post.mascotComment &&
         brixelComments.length === 0 &&
         !brixelReplyRef.current.has(`post:${post.id}`)
       ) {
@@ -94,7 +64,7 @@ export function Feed(): ReactNode {
           fetch("/api/mascot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode: "mention-reply-comment", commentText: comment.text, postId: post.id }),
+            body: JSON.stringify({ mode: "mention-reply-comment", commentText: comment.text, commentId: comment.id, postId: post.id }),
           }).catch(() => brixelReplyRef.current.delete(`comment:${comment.id}`));
         }
       }

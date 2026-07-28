@@ -8,17 +8,52 @@ import { useApp } from "@/lib/app";
 import { useReducedMotion } from "@/lib/motion";
 import type { Gif } from "@/lib/types";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 const MAX = 280;
 
 export function ComposerModal(): ReactNode {
-  const { composerOpen, closeComposer, account, publish } = useApp();
+  const { composerOpen, closeComposer, account, publish, posts } = useApp();
   const reduced = useReducedMotion();
 
   const [text, setText] = useState("");
   const [gif, setGif] = useState<Gif | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionAnchor, setMentionAnchor] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const knownHandles = useMemo(() => {
+    const set = new Set<string>(["@brixel"]);
+    for (const p of posts) if (p.handle && p.handle !== account?.handle) set.add(p.handle);
+    return Array.from(set).sort();
+  }, [posts, account?.handle]);
+
+  const mentionSuggestions = mentionQuery !== null
+    ? knownHandles.filter((h) => h.slice(1).toLowerCase().startsWith(mentionQuery.toLowerCase()))
+    : [];
+
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
+    const val = e.target.value.slice(0, MAX);
+    setText(val);
+    const cursor = e.target.selectionStart ?? val.length;
+    const before = val.slice(0, cursor);
+    const match = before.match(/@([\p{L}\d_]*)$/u);
+    if (match && match.index !== undefined) {
+      setMentionQuery(match[1]);
+      setMentionAnchor(match.index);
+    } else {
+      setMentionQuery(null);
+    }
+  };
+
+  const insertMention = (handle: string): void => {
+    const after = text.slice(mentionAnchor + 1 + (mentionQuery?.length ?? 0));
+    const newText = (text.slice(0, mentionAnchor) + handle + " " + after).slice(0, MAX);
+    setText(newText);
+    setMentionQuery(null);
+    textareaRef.current?.focus();
+  };
 
   // Reset each time the modal opens.
   useEffect(() => {
@@ -104,15 +139,49 @@ export function ComposerModal(): ReactNode {
             <label className="sr-only" htmlFor="composer-text">
               Post text
             </label>
-            <textarea
-              id="composer-text"
-              value={text}
-              onChange={(e) => setText(e.target.value.slice(0, MAX))}
-              placeholder="what's happening? drop a #hashtag or two…"
-              rows={5}
-              autoFocus
-              className="focus-ring w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground min-h-[100px]"
-            />
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                id="composer-text"
+                value={text}
+                onChange={handleTextChange}
+                onKeyDown={(e) => {
+                  if (mentionSuggestions.length > 0 && (e.key === "Escape" || e.key === " ")) {
+                    setMentionQuery(null);
+                  }
+                }}
+                placeholder="what's happening? drop a #hashtag or @someone…"
+                rows={5}
+                autoFocus
+                className="focus-ring w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground min-h-[100px]"
+              />
+              <AnimatePresence>
+                {mentionSuggestions.length > 0 && (
+                  <motion.ul
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute left-0 top-full z-10 mt-1 w-48 border border-border bg-background shadow-lg"
+                    role="listbox"
+                    aria-label="Mention suggestions"
+                  >
+                    {mentionSuggestions.slice(0, 6).map((handle) => (
+                      <li key={handle}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); insertMention(handle); }}
+                          className="w-full px-3 py-2 text-left font-mono text-sm hover:bg-muted focus:bg-muted focus:outline-none"
+                          style={{ color: "var(--accent-2)" }}
+                        >
+                          {handle}
+                        </button>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
 
             <AnimatePresence>
               {gif && (

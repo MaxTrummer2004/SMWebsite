@@ -24,6 +24,7 @@ export async function POST(req: Request) {
       postTexts?: string[];
       messages?: { role: string; content: string }[];
       choice?: string;
+      gifUrl?: string;
     };
     const { mode } = body;
 
@@ -85,16 +86,26 @@ export async function POST(req: Request) {
     }
 
     if (mode === "comment" && body.postText && body.postId) {
+      const userContent: Anthropic.MessageParam["content"] = body.gifUrl
+        ? [
+            {
+              type: "image",
+              source: { type: "url", url: body.gifUrl },
+            },
+            {
+              type: "text",
+              text: body.postText.startsWith("[posted a gif")
+                ? "React to this GIF they posted (1 sentence, witty). Describe what you see."
+                : `Comment on this post with the attached GIF (1 sentence, witty): "${body.postText}"`,
+            },
+          ]
+        : `Comment on this post (1 sentence, witty): "${body.postText}"`;
+
       const msg = await client.messages.create({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 80,
         system: SYSTEM,
-        messages: [
-          {
-            role: "user",
-            content: `Comment on this post (1 sentence, witty): "${body.postText}"`,
-          },
-        ],
+        messages: [{ role: "user", content: userContent }],
       });
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
       if (text) {
@@ -107,6 +118,13 @@ export async function POST(req: Request) {
     }
 
     if (mode === "mention-reply" && body.postText && body.postId) {
+      const { count } = await adminSupabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("post_id", body.postId)
+        .eq("handle", "@brixel");
+      if (count && count > 0) return NextResponse.json({ ok: true, skipped: true });
+
       const msg = await client.messages.create({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 80,
@@ -133,8 +151,27 @@ export async function POST(req: Request) {
     }
 
     if (mode === "mention-reply-comment" && body.postId) {
-      const commentText = (body as { commentText?: string }).commentText;
+      const commentText = (body as { commentText?: string; commentId?: string }).commentText;
+      const commentId = (body as { commentId?: string }).commentId;
       if (!commentText) return NextResponse.json({ error: "missing commentText" }, { status: 400 });
+
+      if (commentId) {
+        const { data: triggerComment } = await adminSupabase
+          .from("comments")
+          .select("created_at")
+          .eq("id", commentId)
+          .single();
+        if (triggerComment) {
+          const { count } = await adminSupabase
+            .from("comments")
+            .select("id", { count: "exact", head: true })
+            .eq("post_id", body.postId)
+            .eq("handle", "@brixel")
+            .gt("created_at", triggerComment.created_at);
+          if (count && count > 0) return NextResponse.json({ ok: true, skipped: true });
+        }
+      }
+
       const msg = await client.messages.create({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 80,

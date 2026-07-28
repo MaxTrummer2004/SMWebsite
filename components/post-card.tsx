@@ -1,13 +1,23 @@
 "use client";
 
-import BlurHighlight from "@/components/blur-highlight";
 import { PixelCharacter } from "@/components/pixel-character";
 import { PixelIcon } from "@/components/pixel-icon";
 import { useApp } from "@/lib/app";
 import { useReducedMotion } from "@/lib/motion";
 import type { Post } from "@/lib/types";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import { Fragment, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+
+function renderPostText(text: string): ReactNode {
+  const parts = text.split(/([@#][\p{L}\d_]+)/gu);
+  return parts.map((part, i) => {
+    if (/^@[\p{L}\d_]+$/u.test(part))
+      return <span key={i} style={{ color: "var(--accent-2)" }}>{part}</span>;
+    if (/^#[\p{L}\d_]+$/u.test(part))
+      return <span key={i} style={{ color: "var(--accent)" }}>{part}</span>;
+    return <Fragment key={i}>{part}</Fragment>;
+  });
+}
 
 function timeAgo(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -124,17 +134,14 @@ export function PostCard({
       </header>
 
       {post.text && (
-        <div className="mt-4 font-mono text-[15px] leading-relaxed">
-          <BlurHighlight
-            highlightedBits={tags}
-            highlightColor="var(--accent)"
-            blurAmount={6}
-            blurDuration={0.5}
-            viewportOptions={{ once: true, amount: 0.15 }}
-          >
-            {post.text}
-          </BlurHighlight>
-        </div>
+        <motion.div
+          className="mt-4 font-mono text-[15px] leading-relaxed"
+          initial={reduced ? undefined : { opacity: 0, filter: "blur(6px)" }}
+          animate={reduced ? undefined : { opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.5 }}
+        >
+          {renderPostText(post.text)}
+        </motion.div>
       )}
 
       {post.gif && (
