@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "invalid subscription" }, { status: 400 });
     }
 
-    await adminSupabase.from("push_subscriptions").upsert(
+    const { error } = await adminSupabase.from("push_subscriptions").upsert(
       {
         endpoint: subscription.endpoint,
         p256dh: (subscription.keys as Record<string, string>)?.p256dh ?? "",
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       { onConflict: "endpoint" },
     );
 
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
