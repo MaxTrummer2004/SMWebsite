@@ -1,4 +1,5 @@
 import { CursorLayer } from "@/components/cursor-layer";
+import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { CursorGrid } from "@/components/cursor-grid";
 import { Providers } from "@/components/providers";
 import { SkipToContent } from "@/components/skip-to-content";
@@ -55,6 +56,7 @@ export default function RootLayout({
           <SkipToContent />
           <CursorLayer />
           {children}
+          <ServiceWorkerRegistrar />
           <ThemeSwitch />
         </Providers>
       </body>

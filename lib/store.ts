@@ -102,7 +102,7 @@ export function usePosts(userId: string | null) {
           .replace(/\s+/g, "")
           .slice(0, 16) || "friend"}`;
 
-      const { error } = await supabase.from("posts").insert({
+      const { data: inserted, error } = await supabase.from("posts").insert({
         user_id: input.userId ?? null,
         author: input.author.trim() || "Anon",
         handle,
@@ -110,9 +110,25 @@ export function usePosts(userId: string | null) {
         text: input.text.trim(),
         gif: input.gif,
         is_mascot: input.isMascot ?? false,
-      });
+      }).select("id").single();
 
-      if (error) console.error("addPost error:", error.message);
+      if (error) {
+        console.error("addPost error:", error.message);
+        return;
+      }
+
+      if (inserted && !input.isMascot) {
+        fetch("/api/push/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            author: input.author.trim() || "Anon",
+            handle,
+            text: input.text.trim(),
+            postId: inserted.id,
+          }),
+        }).catch(() => {});
+      }
     },
     [],
   );

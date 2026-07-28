@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationSettings } from "@/components/notification-settings";
 import { PixelButton } from "@/components/pixel-button";
 import { PixelIcon } from "@/components/pixel-icon";
 import { PostCard } from "@/components/post-card";
@@ -164,6 +165,7 @@ export function Feed(): ReactNode {
           Archive
         </button>
         <span className="h-px flex-1 bg-border" />
+        <NotificationSettings />
         <span className="font-mono text-xs text-muted-foreground">
           {tab === "feed"
             ? `${Math.min(posts.length, 10)} post${Math.min(posts.length, 10) === 1 ? "" : "s"}`
