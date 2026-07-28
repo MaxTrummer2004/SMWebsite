@@ -34,6 +34,7 @@ export function Feed(): ReactNode {
         !p.mascotComment &&
         !p.isMascot &&
         (p.text || p.gif) &&
+        !p.comments?.some((c) => c.handle === "@brixel") &&
         !commentingRef.current.has(p.id),
     );
     for (const post of uncommented) {
