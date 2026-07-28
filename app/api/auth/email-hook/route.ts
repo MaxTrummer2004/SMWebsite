@@ -55,10 +55,14 @@ body{background:#0d0b12;margin:0;padding:40px 20px;font-family:monospace}
 
 export async function POST(req: Request) {
   try {
-    const payload = (await req.json()) as HookPayload;
+    const raw = await req.json();
+    console.log("Hook payload:", JSON.stringify(raw));
+
+    // Supabase may wrap payload differently
+    const payload = (raw.payload ?? raw) as HookPayload;
     const { user, email_data } = payload;
 
-    if (email_data.email_action_type !== "signup") {
+    if (!email_data || email_data.email_action_type !== "signup") {
       return NextResponse.json({ success: true });
     }
 
