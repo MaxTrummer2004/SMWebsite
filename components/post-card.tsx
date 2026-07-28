@@ -142,14 +142,14 @@ export function PostCard({
           initial={reduced ? undefined : { opacity: 0, scale: 0.98 }}
           animate={reduced ? undefined : { opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="pixel-clip mt-4 overflow-hidden border-2 border-foreground"
+          className="pixel-clip mt-4 overflow-hidden border-2 border-foreground max-w-xs"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={post.gif.url}
             alt={post.gif.title}
             loading="lazy"
-            className="h-auto w-full"
+            className="h-auto w-full max-h-40"
           />
         </motion.div>
       )}
