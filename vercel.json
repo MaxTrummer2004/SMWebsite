@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/youtube-watch",
+      "schedule": "0 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
