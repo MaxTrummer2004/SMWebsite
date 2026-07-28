@@ -106,6 +106,60 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (mode === "mention-reply" && body.postText && body.postId) {
+      const msg = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 80,
+        system: SYSTEM,
+        messages: [
+          {
+            role: "user",
+            content: `Someone mentioned you (@brixel) in their post: "${body.postText}"\n\nReply directly to them (1 sentence, casual, no "@brixel" prefix).`,
+          },
+        ],
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+      if (text) {
+        await adminSupabase.from("comments").insert({
+          post_id: body.postId,
+          user_id: null,
+          author: "Brixel",
+          handle: "@brixel",
+          avatar_color: "#ea580c",
+          text,
+        });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (mode === "mention-reply-comment" && body.postId) {
+      const commentText = (body as { commentText?: string }).commentText;
+      if (!commentText) return NextResponse.json({ error: "missing commentText" }, { status: 400 });
+      const msg = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 80,
+        system: SYSTEM,
+        messages: [
+          {
+            role: "user",
+            content: `Someone mentioned you (@brixel) in a comment: "${commentText}"\n\nReply to their comment (1 sentence, casual, no "@brixel" prefix).`,
+          },
+        ],
+      });
+      const text = msg.content[0]?.type === "text" ? msg.content[0].text : "";
+      if (text) {
+        await adminSupabase.from("comments").insert({
+          post_id: body.postId,
+          user_id: null,
+          author: "Brixel",
+          handle: "@brixel",
+          avatar_color: "#ea580c",
+          text,
+        });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     if (mode === "chat" && body.messages) {
       const msg = await client.messages.create({
         model: "claude-haiku-4-5-20251001",

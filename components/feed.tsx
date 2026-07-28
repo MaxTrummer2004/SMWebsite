@@ -22,6 +22,7 @@ export function Feed(): ReactNode {
   const [tab, setTab] = useState<"feed" | "archive">("feed");
 
   const commentingRef = useRef<Set<string>>(new Set());
+  const brixelReplyRef = useRef<Set<string>>(new Set());
   const dailyTriggered = useRef(false);
 
   // Ask mascot to comment on each new post (server writes comment directly to DB)
@@ -42,6 +43,43 @@ export function Feed(): ReactNode {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "comment", postText, postId: post.id }),
       }).catch(() => commentingRef.current.delete(post.id));
+    }
+  }, [hydrated, posts]);
+
+  // Reply when @brixel is mentioned in post text or comments
+  useEffect(() => {
+    if (!hydrated) return;
+    for (const post of posts) {
+      // @brixel in post text → reply as comment (skip mascot's own posts)
+      if (
+        !post.isMascot &&
+        post.text?.toLowerCase().includes("@brixel") &&
+        !post.comments?.some((c) => c.handle === "@brixel") &&
+        !brixelReplyRef.current.has(`post:${post.id}`)
+      ) {
+        brixelReplyRef.current.add(`post:${post.id}`);
+        fetch("/api/mascot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "mention-reply", postText: post.text, postId: post.id }),
+        }).catch(() => brixelReplyRef.current.delete(`post:${post.id}`));
+      }
+
+      // @brixel in a comment → reply as another comment
+      for (const comment of post.comments ?? []) {
+        if (
+          comment.handle !== "@brixel" &&
+          comment.text?.toLowerCase().includes("@brixel") &&
+          !brixelReplyRef.current.has(`comment:${comment.id}`)
+        ) {
+          brixelReplyRef.current.add(`comment:${comment.id}`);
+          fetch("/api/mascot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "mention-reply-comment", commentText: comment.text, postId: post.id }),
+          }).catch(() => brixelReplyRef.current.delete(`comment:${comment.id}`));
+        }
+      }
     }
   }, [hydrated, posts]);
 
