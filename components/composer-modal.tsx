@@ -42,7 +42,7 @@ export function ComposerModal(): ReactNode {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto p-4 py-10"
+        className="fixed inset-0 z-[60] flex items-end sm:items-start justify-center overflow-y-auto p-0 sm:p-4 sm:py-10"
         initial={reduced ? undefined : { opacity: 0 }}
         animate={reduced ? undefined : { opacity: 1 }}
         exit={reduced ? undefined : { opacity: 0 }}
@@ -61,10 +61,10 @@ export function ComposerModal(): ReactNode {
           initial={reduced ? undefined : { opacity: 0, y: 16, scale: 0.98 }}
           animate={reduced ? undefined : { opacity: 1, y: 0, scale: 1 }}
           exit={reduced ? undefined : { opacity: 0, y: 16, scale: 0.98 }}
-          className="pixel-clip pixel-shadow-accent relative w-full max-w-xl border-2 border-foreground bg-background"
+          className="pixel-clip pixel-shadow-accent relative w-full max-w-xl border-2 border-t-2 border-foreground bg-background sm:mb-0 rounded-t-none"
         >
           {/* React Bits: cursor + click reactive banner */}
-          <div className="relative h-24 border-b-2 border-foreground">
+          <div className="relative h-14 sm:h-24 border-b-2 border-foreground">
             <CursorWave
               className="absolute inset-0 h-full w-full"
               width="100%"
@@ -109,9 +109,9 @@ export function ComposerModal(): ReactNode {
               value={text}
               onChange={(e) => setText(e.target.value.slice(0, MAX))}
               placeholder="what's happening? drop a #hashtag or two…"
-              rows={4}
+              rows={5}
               autoFocus
-              className="focus-ring w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground"
+              className="focus-ring w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground min-h-[100px]"
             />
 
             <AnimatePresence>
@@ -161,21 +161,21 @@ export function ComposerModal(): ReactNode {
               )}
             </AnimatePresence>
 
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-4 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setPickerOpen((o) => !o)}
-                className="focus-ring group flex items-center gap-2 border border-border px-3 py-2 font-mono text-sm text-foreground transition-colors hover:border-accent hover:text-accent"
+                className="focus-ring group flex items-center gap-2 border border-border px-4 py-3 sm:px-3 sm:py-2 font-mono text-sm text-foreground transition-colors hover:border-accent hover:text-accent"
                 aria-expanded={pickerOpen}
               >
                 <PixelIcon
                   name="film"
-                  className="h-4 w-4 text-accent transition-transform group-hover:scale-110"
+                  className="h-5 w-5 sm:h-4 sm:w-4 text-accent transition-transform group-hover:scale-110"
                 />
-                {gif ? "Change GIF" : "Add GIF"}
+                <span className="hidden sm:inline">{gif ? "Change GIF" : "Add GIF"}</span>
               </button>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-1 items-center justify-end gap-4">
                 <span
                   className={`font-mono text-xs ${
                     remaining < 20 ? "text-accent" : "text-muted-foreground"
@@ -184,7 +184,7 @@ export function ComposerModal(): ReactNode {
                 >
                   {remaining}
                 </span>
-                <PixelButton onClick={submit} size="md">
+                <PixelButton onClick={submit} size="md" className="flex-1 sm:flex-none py-3 sm:py-2">
                   <span className="font-mono">Publish</span>
                 </PixelButton>
               </div>

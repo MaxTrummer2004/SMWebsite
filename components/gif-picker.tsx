@@ -78,13 +78,13 @@ export function GifPicker({
         </button>
       </div>
 
-      <div className="mt-3 h-64 overflow-y-auto">
+      <div className="mt-3 h-80 overflow-y-auto overscroll-contain scroll-smooth pt-1 pb-1">
         {error ? (
           <p className="p-4 text-center font-mono text-xs text-muted-foreground">
             {error}
           </p>
         ) : loading ? (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 px-0.5">
             {Array.from({ length: 9 }).map((_, i) => (
               <div
                 key={i}
@@ -98,7 +98,7 @@ export function GifPicker({
             No GIFs found. Try another word.
           </p>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 px-0.5">
             {gifs.map((gif) => (
               <button
                 key={gif.url}
