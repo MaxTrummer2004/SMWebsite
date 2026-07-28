@@ -153,7 +153,7 @@ export function Feed(): ReactNode {
         </button>
         <span className="h-px flex-1 bg-border" />
         <NotificationSettings />
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="hidden sm:inline font-mono text-xs text-muted-foreground">
           {tab === "feed"
             ? `${Math.min(posts.length, 10)} post${Math.min(posts.length, 10) === 1 ? "" : "s"}`
             : `${posts.filter(p => p.text).length} entries`}
