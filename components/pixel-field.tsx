@@ -146,7 +146,7 @@ export function PixelField({ className, fill, direction }: { className?: string;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.ceil(width / CELL);
       rows = Math.ceil(height / CELL);
-      offsetX = width - cols * CELL;
+      offsetX = 0;
       rerollPerFrame = Math.max(1, Math.round(cols * rows * 0.006));
 
       cells = Array.from({ length: cols * rows }, (_, i) => {
