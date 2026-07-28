@@ -74,7 +74,7 @@ export function NotificationSettings(): ReactNode {
     setError(null);
     try {
       if (!VAPID_PUBLIC_KEY) throw new Error("VAPID key missing – check Vercel env vars");
-      // Unregister stale SW + subscription before subscribing with new VAPID key
+      // Unregister stale SW + push subscriptions
       const regs = await navigator.serviceWorker.getRegistrations();
       for (const r of regs) {
         const s = await r.pushManager.getSubscription();
@@ -83,13 +83,13 @@ export function NotificationSettings(): ReactNode {
       }
       subRef.current = null;
 
-      const newReg = await navigator.serviceWorker.register("/sw.js");
-      await navigator.serviceWorker.ready;
+      await navigator.serviceWorker.register("/sw.js");
+      const readyReg = await navigator.serviceWorker.ready;
 
       const perm = await Notification.requestPermission();
       setPermission(perm);
       if (perm !== "granted") { setSaving(false); return; }
-      const sub = await newReg.pushManager.subscribe({
+      const sub = await readyReg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
