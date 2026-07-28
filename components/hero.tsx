@@ -101,7 +101,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
           variants={content}
           initial="hidden"
           animate="visible"
-          className="relative z-10 flex w-fit flex-col justify-center px-6 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
+          className="relative z-10 flex w-fit flex-col justify-center px-6 pt-12 pb-60 sm:px-10 sm:py-14 lg:px-16 lg:py-20"
         >
           {/* Opaque backdrop only behind text+buttons — cursor grid shows through empty card area */}
           <div className="relative z-20 w-fit bg-background/85 backdrop-blur-sm px-6 py-8 -mx-6 sm:-mx-10 lg:-mx-16 sm:px-10 lg:px-16">
