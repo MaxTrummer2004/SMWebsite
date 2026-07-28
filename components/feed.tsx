@@ -116,7 +116,7 @@ export function Feed(): ReactNode {
       ) : (
         <div className="space-y-5">
           <AnimatePresence initial={false}>
-            {posts.map((post, i) => (
+            {posts.slice(0, 10).map((post, i) => (
               <PostCard
                 key={post.id}
                 post={post}

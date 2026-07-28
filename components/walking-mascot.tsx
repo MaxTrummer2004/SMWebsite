@@ -103,7 +103,8 @@ export function WalkingMascot(): ReactNode {
         let targetX = 160; // fallback
         if (btn) {
           const btnRect = btn.getBoundingClientRect();
-          targetX = Math.max(8, Math.min(btnRect.right - containerRect.left + 80, maxX - 8));
+          const raw = btnRect.right - containerRect.left + 80;
+          targetX = raw > maxX ? 16 : Math.max(16, raw);
         }
 
         // Pause + bubble before heading left
@@ -219,7 +220,7 @@ export function WalkingMascot(): ReactNode {
         {/* Speech bubble */}
         {message && (
           <div className="relative mb-3">
-            <div className={`border-2 px-3 py-2 font-pixel text-[9px] leading-relaxed whitespace-nowrap ${atButton ? "border-red-600 bg-red-600/10 text-red-600" : "border-foreground bg-background text-foreground"}`}>
+            <div className={`border-2 px-3 py-2 font-pixel text-[9px] leading-relaxed max-w-[180px] break-words ${atButton ? "border-red-600 bg-red-600/10 text-red-600" : "border-foreground bg-background text-foreground"}`}>
               {message}
             </div>
             <div
