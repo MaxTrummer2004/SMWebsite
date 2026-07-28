@@ -118,9 +118,11 @@ export function NotificationSettings(): ReactNode {
   };
 
   const toggleHandle = (handle: string) => {
-    setFollowed((prev) =>
-      prev.includes(handle) ? prev.filter((h) => h !== handle) : [...prev, handle],
-    );
+    setFollowed((prev) => {
+      const next = prev.includes(handle) ? prev.filter((h) => h !== handle) : [...prev, handle];
+      localStorage.setItem("smknowers.notif.followed", JSON.stringify(next));
+      return next;
+    });
   };
 
   if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return null;
