@@ -149,7 +149,7 @@ export function PostCard({
             src={post.gif.url}
             alt={post.gif.title}
             loading="lazy"
-            className="h-auto w-full max-h-56"
+            className="h-auto w-auto max-h-56 max-w-full"
           />
         </motion.div>
       )}
