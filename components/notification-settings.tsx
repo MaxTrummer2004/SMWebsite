@@ -101,7 +101,9 @@ export function NotificationSettings(): ReactNode {
       setFollowed(handles);
       setSubscribed(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
+      const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      console.error("Push subscribe error:", e);
+      setError(msg);
     } finally {
       setSaving(false);
     }
