@@ -24,6 +24,14 @@ export function Feed(): ReactNode {
 
   const commentingRef = useRef<Set<string>>(new Set());
   const brixelReplyRef = useRef<Set<string>>(new Set());
+
+  // Load persisted brixel reply IDs on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("smknowers.brixel.replied");
+      if (saved) brixelReplyRef.current = new Set(JSON.parse(saved));
+    } catch {}
+  }, []);
   const dailyTriggered = useRef(false);
 
   // Ask mascot to comment on each new post (server writes comment directly to DB)
@@ -48,6 +56,13 @@ export function Feed(): ReactNode {
     }
   }, [hydrated, posts]);
 
+  const markBrixelReplied = (key: string) => {
+    brixelReplyRef.current.add(key);
+    try {
+      localStorage.setItem("smknowers.brixel.replied", JSON.stringify([...brixelReplyRef.current]));
+    } catch {}
+  };
+
   // Reply when @brixel is mentioned in post text or comments
   useEffect(() => {
     if (!hydrated) return;
@@ -56,10 +71,9 @@ export function Feed(): ReactNode {
       if (
         !post.isMascot &&
         post.text?.toLowerCase().includes("@brixel") &&
-        !post.comments?.some((c) => c.handle === "@brixel") &&
         !brixelReplyRef.current.has(`post:${post.id}`)
       ) {
-        brixelReplyRef.current.add(`post:${post.id}`);
+        markBrixelReplied(`post:${post.id}`);
         fetch("/api/mascot", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -74,7 +88,7 @@ export function Feed(): ReactNode {
           comment.text?.toLowerCase().includes("@brixel") &&
           !brixelReplyRef.current.has(`comment:${comment.id}`)
         ) {
-          brixelReplyRef.current.add(`comment:${comment.id}`);
+          markBrixelReplied(`comment:${comment.id}`);
           fetch("/api/mascot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
