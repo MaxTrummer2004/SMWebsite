@@ -42,7 +42,7 @@ body{background:#0d0b12;margin:0;padding:40px 20px;font-family:monospace}
       click below to confirm your account and join the feed.
       no ads. no algorithm. just vibes and GIFs.
     </p>
-    <a href="${confirmUrl}" class="btn">▶ CONFIRM &amp; JOIN</a>
+    <a href="${confirmUrl}" style="display:block;margin:24px auto;width:fit-content;background-color:#ea580c;color:#ffffff !important;padding:14px 32px;text-decoration:none;font-family:monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;border:2px solid #ffffff;font-weight:bold;mso-padding-alt:0">▶ BESTÄTIGEN &amp; BEITRETEN</a>
     <p class="msg" style="font-size:11px;text-align:center">
       didn't sign up? ignore this. nothing bad happens. 👾
     </p>
