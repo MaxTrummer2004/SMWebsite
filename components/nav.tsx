@@ -64,19 +64,15 @@ export function Nav(): ReactNode {
                   className="pixel-clip absolute right-0 top-full mt-2 w-48 border-2 border-foreground bg-background p-2 shadow-lg"
                 >
                   <p className="px-2 pb-1 font-pixel text-[9px] text-muted-foreground">color</p>
-                  <div className="mb-2 flex gap-1.5 px-2">
+                  <div className="mb-2 flex gap-2 px-2">
                     {AVATAR_COLORS.map((color) => (
                       <button
                         key={color}
                         type="button"
                         aria-label={color}
                         onClick={() => updateAvatarColor(color)}
-                        className="h-5 w-5 pixel-clip transition-transform hover:scale-110 focus:outline-none"
-                        style={{
-                          backgroundColor: color,
-                          outline: account?.avatarColor === color ? "2px solid white" : undefined,
-                          outlineOffset: account?.avatarColor === color ? "1px" : undefined,
-                        }}
+                        className={`h-6 w-6 rounded-sm transition-transform hover:scale-110 focus:outline-none ${account?.avatarColor === color ? "ring-2 ring-white ring-offset-1 ring-offset-background" : ""}`}
+                        style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
