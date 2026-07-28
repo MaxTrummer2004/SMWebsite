@@ -153,7 +153,7 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
 
             <motion.p
               variants={item}
-              className="mt-6 max-w-2xl font-mono text-base leading-relaxed text-muted-foreground"
+              className="mt-6 max-w-2xl font-mono text-base leading-relaxed text-muted-foreground hidden sm:block"
             >
               SMKnowers is the tiny 8-bit hangout for you and your friends. Write
               a thought, drop the perfect GIF, react, repeat. Your feed lives in
