@@ -66,7 +66,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
-    const confirmUrl = `${email_data.site_url}/auth/v1/verify?token=${email_data.token_hash}&type=signup&redirect_to=${encodeURIComponent(email_data.redirect_to)}`;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const confirmUrl = `${supabaseUrl}/auth/v1/verify?token=${email_data.token_hash}&type=signup&redirect_to=${encodeURIComponent(email_data.redirect_to)}`;
     const name = user.user_metadata?.display_name ?? "";
 
     const res = await fetch("https://api.resend.com/emails", {
