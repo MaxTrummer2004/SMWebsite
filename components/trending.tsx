@@ -94,6 +94,7 @@ export function Trending(): ReactNode {
           maxItems={5}
           animationType="blur"
           enterFrom="top"
+          startFrom="top"
           itemGap={8}
           fadeEdges
           className="font-mono text-xs"

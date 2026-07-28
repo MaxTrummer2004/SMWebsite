@@ -142,7 +142,7 @@ export function PostCard({
           initial={reduced ? undefined : { opacity: 0, scale: 0.98 }}
           animate={reduced ? undefined : { opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="pixel-clip mt-4 overflow-hidden border-2 border-foreground max-w-sm"
+          className="pixel-clip mt-4 overflow-hidden border-2 border-foreground max-w-sm w-fit"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
