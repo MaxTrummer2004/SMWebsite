@@ -40,6 +40,7 @@ type AppContextValue = {
   signup: (input: SignupInput) => Promise<{ ok: boolean; error?: string }>;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
+  updateAvatarColor: (color: string) => Promise<void>;
   authOpen: boolean;
   composerOpen: boolean;
   openComposer: () => void;
@@ -217,6 +218,17 @@ export function AppProvider({ children }: { children: ReactNode }): ReactNode {
     setComposerOpen(false);
   }, []);
 
+  const updateAvatarColor = useCallback(async (color: string) => {
+    if (!account) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_color: color })
+      .eq("id", account.userId);
+    if (!error) {
+      setAccount((prev) => prev ? { ...prev, avatarColor: color } : prev);
+    }
+  }, [account]);
+
   const openComposer = useCallback(() => {
     if (signedIn && account) {
       setComposerOpen(true);
@@ -260,6 +272,7 @@ export function AppProvider({ children }: { children: ReactNode }): ReactNode {
     signup,
     login,
     logout,
+    updateAvatarColor,
     authOpen,
     composerOpen,
     openComposer,

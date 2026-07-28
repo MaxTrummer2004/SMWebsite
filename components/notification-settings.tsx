@@ -41,14 +41,18 @@ export function NotificationSettings(): ReactNode {
     if (typeof window === "undefined" || !("Notification" in window)) return;
     setPermission(Notification.permission);
 
+    // Load saved handles regardless of subscription state
+    const saved = localStorage.getItem("smknowers.notif.followed");
+    if (saved) {
+      try { setFollowed(JSON.parse(saved)); } catch { /* ignore */ }
+    }
+
     // Check if already subscribed
     navigator.serviceWorker.ready.then((reg) => {
       reg.pushManager.getSubscription().then((sub) => {
         if (sub) {
           subRef.current = sub;
           setSubscribed(true);
-          const saved = localStorage.getItem("smknowers.notif.followed");
-          if (saved) setFollowed(JSON.parse(saved));
         }
       });
     });
@@ -119,7 +123,7 @@ export function NotificationSettings(): ReactNode {
     );
   };
 
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return null;
   if (permission === "denied") return null;
 
   return (

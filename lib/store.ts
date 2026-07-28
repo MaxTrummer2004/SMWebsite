@@ -170,7 +170,19 @@ export function usePosts(userId: string | null) {
         avatar_color: input.avatarColor,
         text: input.text,
       });
-      if (error) console.error("addComment error:", error.message);
+      if (error) { console.error("addComment error:", error.message); return; }
+
+      fetch("/api/push/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          author: input.author,
+          handle: input.handle,
+          text: input.text,
+          postId,
+          type: "comment",
+        }),
+      }).catch(() => {});
     },
     [userId],
   );

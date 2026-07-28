@@ -2,11 +2,15 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  "mailto:maxtrummer16@gmail.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+let vapidInitialized = false;
+function initVapid() {
+  if (vapidInitialized) return;
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  if (!pub || !priv) return;
+  webpush.setVapidDetails("mailto:maxtrummer16@gmail.com", pub, priv);
+  vapidInitialized = true;
+}
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,11 +19,14 @@ const adminSupabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { author, handle, text, postId } = await req.json() as {
+    initVapid();
+    if (!vapidInitialized) return NextResponse.json({ ok: true });
+    const { author, handle, text, postId, type } = await req.json() as {
       author: string;
       handle: string;
       text: string;
       postId: string;
+      type?: "post" | "comment";
     };
 
     const { data: subs } = await adminSupabase
@@ -29,9 +36,9 @@ export async function POST(req: Request) {
     if (!subs?.length) return NextResponse.json({ ok: true });
 
     const payload = JSON.stringify({
-      title: `${author} posted`,
+      title: type === "comment" ? `${author} commented` : `${author} posted`,
       body: text ? (text.length > 80 ? text.slice(0, 77) + "…" : text) : "posted a GIF",
-      tag: postId,
+      tag: `${postId}-${type ?? "post"}`,
       url: "/#feed",
     });
 

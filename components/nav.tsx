@@ -4,6 +4,7 @@ import { Logo } from "@/components/logo";
 import { PixelButton } from "@/components/pixel-button";
 import { PixelIcon } from "@/components/pixel-icon";
 import { useApp } from "@/lib/app";
+import { AVATAR_COLORS } from "@/lib/store";
 import { useState, type ReactNode } from "react";
 
 const LINKS = [
@@ -13,7 +14,7 @@ const LINKS = [
 ];
 
 export function Nav(): ReactNode {
-  const { signedIn, account, openComposer, openAuth, logout } = useApp();
+  const { signedIn, account, openComposer, openAuth, logout, updateAvatarColor } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -60,8 +61,26 @@ export function Nav(): ReactNode {
               {menuOpen && (
                 <div
                   role="menu"
-                  className="pixel-clip absolute right-0 top-full mt-2 w-40 border-2 border-foreground bg-background p-1 shadow-lg"
+                  className="pixel-clip absolute right-0 top-full mt-2 w-48 border-2 border-foreground bg-background p-2 shadow-lg"
                 >
+                  <p className="px-2 pb-1 font-pixel text-[9px] text-muted-foreground">color</p>
+                  <div className="mb-2 flex gap-1.5 px-2">
+                    {AVATAR_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        aria-label={color}
+                        onClick={() => updateAvatarColor(color)}
+                        className="h-5 w-5 pixel-clip transition-transform hover:scale-110 focus:outline-none"
+                        style={{
+                          backgroundColor: color,
+                          outline: account?.avatarColor === color ? "2px solid white" : undefined,
+                          outlineOffset: account?.avatarColor === color ? "1px" : undefined,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div className="h-px bg-border mb-1" />
                   <button
                     type="button"
                     role="menuitem"
