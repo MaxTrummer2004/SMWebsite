@@ -94,7 +94,8 @@ export function Hero({ onEnter }: HeroProps): ReactNode {
           }}
           // Desktop overrides mask to original radial gradient
         >
-          <PixelField className="h-full w-full" />
+          <PixelField className="h-full w-full sm:hidden" fill={0.65} />
+          <PixelField className="h-full w-full hidden sm:block" />
         </motion.div>
         {/* Desktop-only mask override */}
         <motion.div
