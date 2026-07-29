@@ -12,8 +12,6 @@ import type { Gif } from "@/lib/types";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-const MAX = 280;
-
 export function ComposerModal(): ReactNode {
   const { composerOpen, closeComposer, account, publish, posts } = useApp();
   const reduced = useReducedMotion();
@@ -41,7 +39,6 @@ export function ComposerModal(): ReactNode {
 
   if (!composerOpen || !account) return null;
 
-  const remaining = MAX - text.length;
   const canPost = text.trim().length > 0 || gif !== null;
 
   const submit = (): void => {
@@ -119,14 +116,14 @@ export function ComposerModal(): ReactNode {
                 ref={mention.inputRef as React.RefObject<HTMLTextAreaElement>}
                 id="composer-text"
                 value={text}
-                onChange={(e) => mention.onInputChange(e, setText, MAX)}
-                onKeyDown={(e) => mention.onKeyDown(e, text, setText, MAX)}
+                onChange={(e) => mention.onInputChange(e, setText)}
+                onKeyDown={(e) => mention.onKeyDown(e, text, setText)}
                 placeholder="what's happening? drop a #hashtag or @someone…"
                 rows={5}
                 autoFocus
                 className="focus-ring w-full resize-none bg-transparent font-mono text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground min-h-[100px]"
               />
-              <MentionDropdown suggestions={mention.suggestions} onSelect={(h) => mention.insertMention(h, text, setText, MAX)} />
+              <MentionDropdown suggestions={mention.suggestions} onSelect={(h) => mention.insertMention(h, text, setText)} />
             </div>
 
             <AnimatePresence>
@@ -191,14 +188,6 @@ export function ComposerModal(): ReactNode {
               </button>
 
               <div className="flex flex-1 items-center justify-end gap-4">
-                <span
-                  className={`font-mono text-xs ${
-                    remaining < 20 ? "text-accent" : "text-muted-foreground"
-                  }`}
-                  aria-live="polite"
-                >
-                  {remaining}
-                </span>
                 <PixelButton onClick={submit} size="md" className="flex-1 sm:flex-none py-3 sm:py-2">
                   <span className="font-mono">Publish</span>
                 </PixelButton>
